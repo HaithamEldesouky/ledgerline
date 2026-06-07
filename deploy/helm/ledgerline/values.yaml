@@ -1,0 +1,82 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/haithameldesouky/ledgerline
+  tag: ""            # defaults to .Chart.AppVersion when empty
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: ledgerline.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Non-secret configuration, rendered into a ConfigMap and exposed as env vars.
+config:
+  HOST: "0.0.0.0"
+  PORT: "8080"
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+  STORAGE_DRIVER: "postgres"
+  RATE_LIMIT_RPS: "200"
+  RATE_LIMIT_BURST: "400"
+  SHUTDOWN_TIMEOUT: "15s"
+
+# Database secret. Provide `existingSecret` (with a DATABASE_URL key) for
+# production, or set `url` to have the chart create the Secret for you.
+database:
+  existingSecret: ""
+  url: "postgres://ledgerline:CHANGE_ME@postgres:5432/ledgerline?sslmode=require"

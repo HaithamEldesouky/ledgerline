@@ -1,0 +1,16 @@
+apiVersion: v2
+name: ledgerline
+description: A cloud-native, double-entry payments ledger microservice.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - fintech
+  - ledger
+  - payments
+  - microservice
+home: https://github.com/haithamEldesouky/ledgerline
+sources:
+  - https://github.com/haithamEldesouky/ledgerline
+maintainers:
+  - name: Haitham Eldesouky

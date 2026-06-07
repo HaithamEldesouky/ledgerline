@@ -1,0 +1,19 @@
+LedgerLine has been deployed. 🎉
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image:     {{ include "ledgerline.image" . }}
+
+Check rollout status:
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "ledgerline.fullname" . }}
+
+Port-forward and call the API locally:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "ledgerline.fullname" . }} 8080:{{ .Values.service.port }}
+  curl http://localhost:8080/health/ready
+  open  http://localhost:8080/docs
+
+{{- if not .Values.database.existingSecret }}
+
+NOTE: A Secret was generated from `database.url`. For production, set
+`database.existingSecret` to a securely-managed Secret instead.
+{{- end }}

@@ -1,8 +1,9 @@
-# Binaries
+# Binaries (anchored to repo root so they don't match cmd/ledgerline or
+# deploy/helm/ledgerline)
 /bin/
 /dist/
-ledgerline
-ledgerline.exe
+/ledgerline
+/ledgerline.exe
 *.exe
 *.test
 *.out
