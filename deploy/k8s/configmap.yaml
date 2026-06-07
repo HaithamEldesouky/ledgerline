@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ledgerline-config
+  namespace: ledgerline
+  labels:
+    app.kubernetes.io/name: ledgerline
+data:
+  HOST: "0.0.0.0"
+  PORT: "8080"
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+  STORAGE_DRIVER: "postgres"
+  RATE_LIMIT_RPS: "200"
+  RATE_LIMIT_BURST: "400"
+  SHUTDOWN_TIMEOUT: "15s"

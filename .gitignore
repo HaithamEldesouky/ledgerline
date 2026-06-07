@@ -1,0 +1,33 @@
+# Binaries
+/bin/
+/dist/
+ledgerline
+ledgerline.exe
+*.exe
+*.test
+*.out
+
+# Go workspace / coverage
+coverage.out
+coverage.txt
+*.prof
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Terraform
+deploy/terraform/.terraform/
+deploy/terraform/*.tfstate
+deploy/terraform/*.tfstate.*
+deploy/terraform/*.tfvars
+!deploy/terraform/*.tfvars.example
+deploy/terraform/.terraform.lock.hcl
+crash.log

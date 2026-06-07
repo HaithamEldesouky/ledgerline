@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: LedgerLine API
+  version: 1.0.0
+  description: >
+    A cloud-native, double-entry payments ledger microservice.
+    All monetary amounts are integers in minor units (e.g. cents):
+    `100` with currency `USD` means $1.00.
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: Accounts
+    description: Account management
+  - name: Transfers
+    description: Double-entry money movement
+  - name: Observability
+    description: Health probes and metrics
+paths:
+  /api/v1/accounts:
+    post:
+      tags: [Accounts]
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/Error'
+    get:
+      tags: [Accounts]
+      summary: List accounts
+      responses:
+        '200':
+          description: A list of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+  /api/v1/accounts/{id}:
+    get:
+      tags: [Accounts]
+      summary: Get an account by id
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: The account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/accounts/{id}/transactions:
+    get:
+      tags: [Accounts]
+      summary: List an account's ledger entries
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Ledger entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LedgerEntry'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/transfers:
+    post:
+      tags: [Transfers]
+      summary: Create a transfer (double-entry posting)
+      description: >
+        Atomically debits the source account and credits the destination
+        account. Provide an `Idempotency-Key` header to make retries safe — a
+        repeated key returns the original transfer without re-applying it.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+          description: Unique key to make the request idempotent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransferRequest'
+      responses:
+        '201':
+          description: Transfer posted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResult'
+        '400':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+  /health/live:
+    get:
+      tags: [Observability]
+      summary: Liveness probe
+      responses:
+        '200':
+          description: The process is up
+  /health/ready:
+    get:
+      tags: [Observability]
+      summary: Readiness probe
+      responses:
+        '200':
+          description: Ready to serve traffic
+        '503':
+          description: A dependency is unavailable
+  /metrics:
+    get:
+      tags: [Observability]
+      summary: Prometheus metrics
+      responses:
+        '200':
+          description: Metrics in Prometheus text format
+components:
+  parameters:
+    AccountId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Error:
+      description: An error occurred
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Alice Wallet
+        currency:
+          type: string
+          example: USD
+        type:
+          type: string
+          enum: [internal, external]
+        balanceMinor:
+          type: integer
+          format: int64
+          example: 10000
+        createdAt:
+          type: string
+          format: date-time
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        transferId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum: [debit, credit]
+        amountMinor:
+          type: integer
+          format: int64
+        balanceAfterMinor:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+        amountMinor:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        idempotencyKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    TransferResult:
+      type: object
+      properties:
+        transfer:
+          $ref: '#/components/schemas/Transfer'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEntry'
+    CreateAccountRequest:
+      type: object
+      required: [name, currency]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        currency:
+          type: string
+          pattern: '^[A-Za-z]{3}$'
+        type:
+          type: string
+          enum: [internal, external]
+          default: internal
+    CreateTransferRequest:
+      type: object
+      required: [fromAccountId, toAccountId, amountMinor, currency]
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+        amountMinor:
+          type: integer
+          format: int64
+          minimum: 1
+        currency:
+          type: string
+          pattern: '^[A-Za-z]{3}$'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true

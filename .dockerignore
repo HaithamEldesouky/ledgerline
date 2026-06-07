@@ -1,0 +1,25 @@
+# VCS / CI
+.git
+.github
+.gitignore
+
+# Local tooling & docs
+deploy
+docs
+monitoring
+*.md
+!README.md
+LICENSE
+
+# Environment & local artifacts
+.env
+.env.*
+!.env.example
+bin
+dist
+coverage.out
+coverage.txt
+.vscode
+.idea
+.DS_Store
+Thumbs.db

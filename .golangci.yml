@@ -1,0 +1,10 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+# Uses golangci-lint's default linter set (errcheck, govet, ineffassign,
+# staticcheck, unused). Comments intentionally use British English spelling.
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

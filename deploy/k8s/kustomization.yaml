@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ledgerline
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.example.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - ingress.yaml
+
+# ServiceMonitor is intentionally excluded by default because it requires the
+# Prometheus Operator CRDs. Add it once the operator is installed:
+#   - servicemonitor.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: ledgerline

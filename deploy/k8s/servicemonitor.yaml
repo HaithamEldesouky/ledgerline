@@ -1,0 +1,18 @@
+# Requires the Prometheus Operator (CRD: monitoring.coreos.com/v1).
+# Tells Prometheus to scrape the service's /metrics endpoint.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ledgerline
+  namespace: ledgerline
+  labels:
+    app.kubernetes.io/name: ledgerline
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ledgerline
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
