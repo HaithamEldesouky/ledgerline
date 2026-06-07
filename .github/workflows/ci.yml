@@ -123,7 +123,7 @@ jobs:
           govulncheck ./...
       - name: Trivy filesystem scan (report only)
         continue-on-error: true
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scanners: vuln,misconfig,secret
