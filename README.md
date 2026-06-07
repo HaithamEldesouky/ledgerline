@@ -66,6 +66,10 @@ flowchart LR
 
 ## Quick start
 
+> New here? The [**Getting Started (plain English)**](docs/getting-started.md)
+> guide explains what the service does and how to run it, no prior knowledge
+> needed.
+
 ### Run locally (no dependencies)
 
 The service runs out of the box with an in-memory store:
